@@ -1,0 +1,19 @@
+column_order=[
+    "VA_NUM",
+    "CA_NUM",
+    "AGMT_DESC",
+    "ASSOCIATE",
+    "TEAM_LEAD",
+    "TEAM",
+    "NOTES",
+    "SR",
+    "COMPLETED",
+    "ERROR",
+    "YEAR",
+    "PERIOD",
+    "WEEK",
+    "ACCURACY",
+    "COUNT",
+    "ACC_DESC",
+    "PASS_FAIL"
+]

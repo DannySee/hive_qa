@@ -1,19 +1,25 @@
-import pandas as pd
 import sqlalchemy
+import pandas as pd
+from deta import Deta
 
-sql_server =  sqlalchemy.create_engine('mssql+pyodbc://MS248CSSQL01/Pricing_Agreements?driver=SQL+Server')
+sql_server = sqlalchemy.create_engine(f"mssql+pymssql://admin:Magazineapt1@hive-db.ckhwntg3tw7d.us-east-2.rds.amazonaws.com:1433/hive")
+deta = Deta('b0nqekpqxrp_8XBkoqzrTjtNjUubNLFTauZ1xTDUTokS')
 
 
 def get_data(table):
     with sql_server.connect() as connection:
-        df = pd.read_sql(f"SELECT * FROM {table} WHERE WEEK = 23 AND YEAR = 2023 ORDER BY PRIMARY_KEY", connection, index_col="PRIMARY_KEY")
+        df = pd.read_sql(f"SELECT VA_NUM,CA_NUM,AGMT_DESC,ASSOCIATE,TEAM_LEAD,TEAM,NOTES,SR,COMPLETED,ERROR,YEAR,PERIOD,WEEK,ACCURACY,COUNT,ACC_DESC,PASS_FAIL FROM {table} ORDER BY PRIMARY_KEY ", connection)
         df.fillna("", inplace=True) 
 
     return df.astype(str)
 
 
-df = get_data("Agreement_Archive")
+def put_task():
+    
+    db = deta.Base("quality_agreement")
+    return db.fetch().items
 
 
-for row in df.items():
-    print(row[0])
+data = put_task()
+
+print(data)
