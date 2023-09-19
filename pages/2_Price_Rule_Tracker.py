@@ -1,5 +1,52 @@
 import streamlit as st
 import data_handler as db
+import config.quality_agreement as qa
+import pandas as pd\
+
+
+@st.cache_data()
+def agreement_data():
+    with db.sql_server.begin() as connection:
+        df = pd.read_sql(f"SELECT * FROM Dash_Agreement ORDER BY PRIMARY_KEY", connection)
+        df.fillna("", inplace=True)
+
+    return df.astype(str)
+
+
+@st.cache_data()
+def price_rule_data():
+    with db.sql_server.begin() as connection:
+        df = pd.read_sql("""
+                            SELECT 
+                            PRIMARY_KEY, 
+                            CUSTOMER, 
+                            DESCRIPTION, 
+                            NAME, 
+                            ASSOCIATE, 
+                            TEAM_LEAD, 
+                            APP_DATE, 
+                            YEAR, 
+                            PERIOD, 
+                            WEEK, 
+                            CAST(GRADE*100 AS INT) AS GRADE, 
+                            PASS_FAIL 
+
+                            FROM Dash_PriceRule 
+                            
+                            ORDER BY PRIMARY_KEY
+                        """, connection)
+        df.fillna("", inplace=True)
+
+    return df.astype(str)
+
+
+@st.cache_data()
+def inquiry_data():
+    with db.sql_server.begin() as connection:
+        df = pd.read_sql(f"SELECT * FROM Dash_Inquiry ORDER BY PRIMARY_KEY", connection)
+        df.fillna("", inplace=True)
+
+    return df.astype(str)
 
 
 def build_editor(table, data):
@@ -26,33 +73,33 @@ def export_button(table, data):
     )
 
 
-def build_tab(tab, table):
-    data = db.get_data(table)
+def build_tab(table, data_func, date_columns=None):
 
-    with tab:
-        st.button("Save", on_click=db.save_updates(table, data), key=f"{table}_save")
-        build_editor(table, data)
+    data = data_func()
 
-        st.markdown("---")
+    st.button("Save", on_click=lambda: db.save_updates(table, data, data_func), key=f"{table}_save")
+    build_editor(table, data)
 
-        export_button(table, data) 
-        st.file_uploader("Import a CSV file:", on_change=db.import_file(table, data), key=f"{table}_import")
-    
+    st.markdown("---")
+
+    export_button(table, data) 
+    st.file_uploader("Import a CSV file:", on_change=lambda: db.import_file(table, data, data_func, date_columns), key=f"{table}_import")
+        
 
 def main():
     st.set_page_config(layout="wide")
 
-    st.title("Quality Metrics")
+    st.title("Price Rule Tracker")
     agreement, inquiry, price_rule = st.tabs(["Agreement Accuracy", "Support Request Timeliness", "Price Rule Accuracy"])
 
-    tabs = {
-        agreement: "Agreement_Archive",
-        inquiry: "Inquiry_Archive",
-        price_rule: "PriceRule_Archive"
-    }
-    for tab, table in tabs.items():
-        build_tab(tab, table)
-        
+    with agreement:
+        build_tab("Dash_Agreement", agreement_data)
+
+    with inquiry:
+        build_tab("Dash_Inquiry", inquiry_data, ["OPENED","CLOSED"])
+    
+    with price_rule:
+        build_tab("Dash_PriceRule", price_rule_data, ["APP_DATE"])
 
 if __name__ == "__main__":
     main()
