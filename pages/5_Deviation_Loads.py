@@ -122,7 +122,7 @@ def build_tab(table, data_func, date_columns=None):
     build_filters(table, data)
     data = apply_filters(table, data)
     build_editor(table, data)
-    st.button("Save Changes", on_click=lambda: db.save_updates(table, data, data_func), key=f"{table}_save")
+    st.button("Save", on_click=lambda: db.save_updates(table, data, data_func), key=f"{table}_save")
 
     st.markdown("---")
 
@@ -132,6 +132,7 @@ def build_tab(table, data_func, date_columns=None):
 
 def main():
     st.set_page_config(layout="wide")
+    st.sidebar.title("Navigation")
 
     st.title("Quality Metrics")
     agreement, inquiry, price_rule = st.tabs(["Agreement Accuracy", "Support Request Timeliness", "Price Rule Accuracy"])
