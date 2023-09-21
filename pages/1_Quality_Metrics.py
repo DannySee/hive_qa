@@ -7,7 +7,7 @@ import pandas as pd
 @st.cache_data()
 def agreement_data():
     with db.sql_server.begin() as connection:
-        df = pd.read_sql(f"SELECT * FROM Dash_Agreement ORDER BY PRIMARY_KEY DESC", connection)
+        df = pd.read_sql(f"SELECT * FROM quality_agreement ORDER BY PRIMARY_KEY DESC", connection)
         df.fillna("", inplace=True)
 
     return df.astype(str)
@@ -17,24 +17,26 @@ def agreement_data():
 def price_rule_data():
     with db.sql_server.begin() as connection:
         df = pd.read_sql("""
-                            SELECT 
-                            PRIMARY_KEY, 
-                            CUSTOMER, 
-                            DESCRIPTION, 
-                            NAME, 
-                            ASSOCIATE, 
-                            TEAM_LEAD, 
-                            APP_DATE, 
-                            YEAR, 
-                            PERIOD, 
-                            WEEK, 
-                            CAST(GRADE*100 AS INT) AS GRADE, 
-                            PASS_FAIL 
+                SELECT 
+                PRIMARY_KEY, 
+                CUSTOMER, 
+                DESCRIPTION, 
+                NAME, 
+                ASSOCIATE, 
+                TEAM_LEAD, 
+                APP_DATE, 
+                YEAR, 
+                PERIOD, 
+                WEEK, 
+                CAST(GRADE*100 AS INT) AS GRADE, 
+                PASS_FAIL 
 
-                            FROM Dash_PriceRule 
-                            
-                            ORDER BY PRIMARY_KEY
-                        """, connection)
+                FROM Dash_PriceRule 
+                
+                ORDER BY PRIMARY_KEY
+            """, 
+            connection
+        )
         df.fillna("", inplace=True)
 
     return df.astype(str)
@@ -137,7 +139,7 @@ def main():
     agreement, inquiry, price_rule = st.tabs(["Agreement Accuracy", "Support Request Timeliness", "Price Rule Accuracy"])
 
     with agreement:
-        build_tab("Dash_Agreement", agreement_data)
+        build_tab("quality_agreement", agreement_data)
 
     with inquiry:
         build_tab("Dash_Inquiry", inquiry_data, ["OPENED","CLOSED"])
