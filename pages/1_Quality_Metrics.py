@@ -5,8 +5,8 @@ import pandas as pd
 import page_setup as ps
 
 agreement_table = "quality_agreement"
-inquiry_table = "Dash_Inquiry"
-price_rule_table = "Dash_PriceRule"
+inquiry_table = "quality_inquiry"
+price_rule_table = "quality_price_rule"
 
 
 @st.cache_data()

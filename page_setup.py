@@ -32,10 +32,10 @@ def clear_filters(table, columns):
             st.session_state[f"{table}_{column}_filter"] = ""
 
 
-def build_filters(table, data):
+def build_filters(table, data, quick_filters=None):
     columns = data.columns.tolist()
 
-    with st.expander("Filters", expanded=False):
+    with st.expander("All Filters", expanded=False):
         st.caption("_Note: Unsaved changes will be lost when filters are applied._")
 
         col1, col2, col3, col4, col5, col6, col7 = st. columns(7)
@@ -54,6 +54,17 @@ def build_filters(table, data):
             
         col1.button("Clear Filters", on_click=lambda: clear_filters(table, columns), key=f"{table}_clear_filters")
 
+    if quick_filters:
+        with st.sidebar:
+            st.title("Quick Filters")
+            for column in quick_filters:
+                st.multiselect(
+                    column,
+                    data[column].unique().tolist(),
+                    [],
+                    key=f"{table}_{column}_quick_filter"
+                )
+
 
 def apply_filters(table, data):
     columns = data.columns.tolist()
@@ -62,13 +73,15 @@ def apply_filters(table, data):
         if column != "PRIMARY_KEY":
             if f"{table}_{column}_filter" in st.session_state:
                 data = data[data[column].str.contains(st.session_state[f"{table}_{column}_filter"], case=False, na=False)]
+            if f"{table}_{column}_quick_filter" in st.session_state and st.session_state[f"{table}_{column}_quick_filter"] != []:
+                data = data[data[column].isin(st.session_state[f"{table}_{column}_quick_filter"])]
 
     return data
 
 
-def build_tab(table, data_func, date_columns=None):
+def build_tab(table, data_func, date_columns=None, quick_filters=None):
     data = data_func(table)
-    build_filters(table, data)
+    build_filters(table, data, quick_filters)
     
     data = apply_filters(table, data)
     build_editor(table, data)

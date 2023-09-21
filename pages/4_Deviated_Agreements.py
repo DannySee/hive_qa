@@ -4,11 +4,11 @@ import config.quality_agreement as qa
 import pandas as pd
 import page_setup as ps
 
-deviated_agreement_table = "hive_Programs"
+data_table = "deviated_agreements"
 
 
-#@st.cache_data()
-def deviated_agreement_data(table):
+@st.cache_data()
+def pull_data(table):
     with db.sql_server.begin() as connection:
         df = pd.read_sql(f"SELECT * FROM {table} ORDER BY PRIMARY_KEY DESC", connection)
         df.fillna("", inplace=True)
@@ -20,7 +20,7 @@ def main():
     st.set_page_config(layout="wide")
     st.title("Deviated Agreements")
 
-    ps.build_tab(deviated_agreement_table, deviated_agreement_data)
+    ps.build_tab(data_table, pull_data, ['START_DATE','END_DATE','TIMESTAMP'])
 
 if __name__ == "__main__":
     main()
