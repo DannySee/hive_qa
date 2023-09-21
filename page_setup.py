@@ -56,7 +56,7 @@ def build_filters(table, data, quick_filters=None):
 
     if quick_filters:
         with st.sidebar:
-            st.title("Quick Filters")
+            st.markdown("### Quick Filters")
             st.caption("_Note: Unsaved changes will be lost when filters are applied._")
             
             for column in quick_filters:
